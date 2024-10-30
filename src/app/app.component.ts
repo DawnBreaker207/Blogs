@@ -9,6 +9,4 @@ import { FooterComponent } from './core/layout/footer.component';
   standalone: true,
   imports: [HeaderComponent, RouterOutlet, FooterComponent],
 })
-export class AppComponent {
-  title = 'Blog';
-}
+export class AppComponent {}

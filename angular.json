@@ -7,13 +7,13 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "standalone": false
+          "standalone": true
         },
         "@schematics/angular:directive": {
-          "standalone": false
+          "standalone": true
         },
         "@schematics/angular:pipe": {
-          "standalone": false
+          "standalone": true
         }
       },
       "root": "",
@@ -114,8 +114,15 @@
   "schematics": {
     "@schematics/angular": {
       "component": {
-        "spec": false
+        "skipTests": true
       }
+    },
+    "@schematics/angular:component": {
+      "standalone": true,
+      "skipTests": true
+    },
+    "@schematics/angular:services": {
+      "skipTests": true
     }
   },
   "cli": {
