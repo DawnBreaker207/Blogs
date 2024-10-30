@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Directive({
   selector: '[appIfAuthenticated]',
+  standalone: true,
 })
 export class IfAuthenticatedDirective<T> implements OnInit {
   destroyRef = inject(DestroyRef);

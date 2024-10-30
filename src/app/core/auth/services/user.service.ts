@@ -38,7 +38,7 @@ export class UserService {
   }
 
   register(credentials: {
-    username: string;
+    userName: string;
     email: string;
     password: string;
   }): Observable<{ user: User }> {
