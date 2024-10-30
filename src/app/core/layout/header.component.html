@@ -49,14 +49,14 @@
         <li class="nav-item">
           <a
             class="nav-link"
-            [routerLink]="['/profile', currentUser.username]"
+            [routerLink]="['/profile', currentUser.userName]"
             routerLinkActive="active">
             <img
               [src]="currentUser.image"
               *ngIf="currentUser.image"
               [alt]=""
               class="user-pic" />
-            {{ currentUser.username }}
+            {{ currentUser.userName }}
           </a>
         </li>
       }

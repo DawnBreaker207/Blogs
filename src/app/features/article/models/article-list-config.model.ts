@@ -1,7 +1,7 @@
 export interface ArticleListConfig {
   type: string;
   filters: {
-    tags?: string;
+    tag?: string;
     author?: string;
     favorited?: string;
     limit?: number;

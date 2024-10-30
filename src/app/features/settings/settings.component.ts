@@ -57,7 +57,7 @@ export class SettingsComponent implements OnInit {
 
     this.userService.update(this.settingsForm.value).subscribe({
       next: ({ user }) =>
-        void this.router.navigate(['/profile/', user.username]),
+        void this.router.navigate(['/profile/', user.userName]),
 
       error: err => {
         this.errors = err;
