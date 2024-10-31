@@ -1,16 +1,14 @@
-import { LoadingState } from '@/app/core/models/loading-state.model';
-import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { Component, DestroyRef, inject, Input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ArticlesService } from '../services/articles.service';
 import { ArticleListConfig } from '../models/article-list-config.model';
 import { Article } from '../models/article.model';
-import { ArticlesService } from '../services/articles.service';
 import { ArticlePreviewComponent } from './article-preview.component';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
+import { LoadingState } from '../../../core/models/loading-state.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-article-list',
-  standalone: true,
-  imports: [ArticlePreviewComponent, NgForOf, NgClass, NgIf],
   template: `
     @if (loading === LoadingState.LOADING) {
       <div class="article-preview">Loading articles...</div>
@@ -38,11 +36,13 @@ import { ArticlePreviewComponent } from './article-preview.component';
       </nav>
     }
   `,
+  imports: [ArticlePreviewComponent, NgForOf, NgClass, NgIf],
   styles: `
     .page-link {
       cursor: pointer;
     }
   `,
+  standalone: true,
 })
 export class ArticleListComponent {
   query!: ArticleListConfig;
@@ -62,12 +62,14 @@ export class ArticleListComponent {
       this.runQuery();
     }
   }
+
   constructor(private articlesService: ArticlesService) {}
 
   setPageTo(pageNumber: number) {
     this.currentPage = pageNumber;
     this.runQuery();
   }
+
   runQuery() {
     this.loading = LoadingState.LOADING;
     this.results = [];
@@ -75,8 +77,9 @@ export class ArticleListComponent {
     // Create limit and offset filter (if necessary)
     if (this.limit) {
       this.query.filters.limit = this.limit;
-      this.query.filters.offset = (this.currentPage - 1) * this.limit;
+      this.query.filters.offset = this.limit * (this.currentPage - 1);
     }
+
     this.articlesService
       .query(this.query)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -86,7 +89,7 @@ export class ArticleListComponent {
 
         // Used from http://www.jstips.co/en/create-range-0...n-easily-using-one-line/
         this.totalPages = Array.from(
-          new Array(Math.ceil(data.articleCount / this.limit)),
+          new Array(Math.ceil(data.articlesCount / this.limit)),
           (val, index) => index + 1
         );
       });

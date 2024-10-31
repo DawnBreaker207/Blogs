@@ -1,6 +1,4 @@
-import { AsyncPipe, NgIf } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   ActivatedRoute,
   Router,
@@ -8,15 +6,18 @@ import {
   RouterLinkActive,
   RouterOutlet,
 } from '@angular/router';
-import { catchError, combineLatest, of, switchMap, throwError } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
+import { combineLatest, of, throwError } from 'rxjs';
 import { UserService } from '../../../../core/auth/services/user.service';
-import { FollowButtonComponent } from '../../components/follow-button.component';
 import { Profile } from '../../models/profile.model';
 import { ProfileService } from '../../services/profile.service';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FollowButtonComponent } from '../../components/follow-button.component';
 
 @Component({
-  selector: 'app-profile',
-  standalone: true,
+  selector: 'app-profile-page',
+  templateUrl: './profile.component.html',
   imports: [
     FollowButtonComponent,
     NgIf,
@@ -24,21 +25,25 @@ import { ProfileService } from '../../services/profile.service';
     AsyncPipe,
     RouterLinkActive,
     RouterOutlet,
+    FollowButtonComponent,
   ],
-  templateUrl: './profile.component.html',
+  standalone: true,
 })
 export class ProfileComponent implements OnInit {
   profile!: Profile;
   isUser: boolean = false;
   destroyRef = inject(DestroyRef);
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly userService: UserService,
-    private readonly ProfileService: ProfileService
+    private readonly profileService: ProfileService
   ) {}
-  ngOnInit(): void {
-    this.ProfileService.get(this.route.snapshot.params['userName'])
+
+  ngOnInit() {
+    this.profileService
+      .get(this.route.snapshot.params['username'])
       .pipe(
         catchError(error => {
           void this.router.navigate(['/']);
@@ -51,7 +56,7 @@ export class ProfileComponent implements OnInit {
       )
       .subscribe(([profile, user]) => {
         this.profile = profile;
-        this.isUser = profile.userName === user?.userName;
+        this.isUser = profile.username === user?.username;
       });
   }
 

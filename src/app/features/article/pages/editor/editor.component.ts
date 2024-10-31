@@ -1,10 +1,5 @@
-import { UserService } from '@/app/core/auth/services/user.service';
-import { Errors } from '@/app/core/models/errors.model';
-import { ArticlesService } from '@/app/features/article/services/articles.service';
-import { ListErrorsComponent } from '@/app/shared/component/list-errors/list-errors.component';
 import { NgForOf } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormControl,
   FormGroup,
@@ -13,6 +8,11 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { Errors } from '../../../../core/models/errors.model';
+import { ArticlesService } from '../../services/articles.service';
+import { UserService } from '../../../../core/auth/services/user.service';
+import { ListErrorsComponent } from '../../../../shared/components/list-errors.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface ArticleForm {
   title: FormControl<string>;
@@ -21,19 +21,19 @@ interface ArticleForm {
 }
 
 @Component({
-  selector: 'app-editor',
-  standalone: true,
-  imports: [ListErrorsComponent, ReactiveFormsModule, NgForOf],
+  selector: 'app-editor-page',
   templateUrl: './editor.component.html',
+  imports: [ListErrorsComponent, ReactiveFormsModule, NgForOf],
+  standalone: true,
 })
-export class EditorComponent implements OnInit {
+export default class EditorComponent implements OnInit {
   tagList: string[] = [];
   articleForm: UntypedFormGroup = new FormGroup<ArticleForm>({
     title: new FormControl('', { nonNullable: true }),
     description: new FormControl('', { nonNullable: true }),
     body: new FormControl('', { nonNullable: true }),
   });
-  tagField = new FormControl('', { nonNullable: true });
+  tagField = new FormControl<string>('', { nonNullable: true });
 
   errors: Errors | null = null;
   isSubmitting = false;
@@ -54,7 +54,7 @@ export class EditorComponent implements OnInit {
       ])
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe(([article, { user }]) => {
-          if (user.userName === article.author.userName) {
+          if (user.username === article.author.username) {
             this.tagList = article.tagList;
             this.articleForm.patchValue(article);
           } else {
@@ -65,14 +65,13 @@ export class EditorComponent implements OnInit {
   }
 
   addTag() {
-    //   Retreive tag control
+    // retrieve tag control
     const tag = this.tagField.value;
-    //   Only add tag if it does not exist yet
-
+    // only add tag if it does not exist yet
     if (tag != null && tag.trim() !== '' && this.tagList.indexOf(tag) < 0) {
       this.tagList.push(tag);
-      // Clear the input
     }
+    // clear the input
     this.tagField.reset('');
   }
 
@@ -83,10 +82,10 @@ export class EditorComponent implements OnInit {
   submitForm(): void {
     this.isSubmitting = true;
 
-    //   Update any single tag
+    // update any single tag
     this.addTag();
 
-    //   Post the changes
+    // post the changes
     this.articleService
       .create({
         ...this.articleForm.value,
@@ -94,7 +93,7 @@ export class EditorComponent implements OnInit {
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: article => this.router.navigate(['/article', article.slug]),
+        next: article => this.router.navigate(['/article/', article.slug]),
         error: err => {
           this.errors = err;
           this.isSubmitting = false;

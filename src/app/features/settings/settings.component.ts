@@ -1,8 +1,4 @@
-import { UserService } from '@/app/core/auth/services/user.service';
-import { User } from '@/app/core/auth/user.model';
-import { Errors } from '@/app/core/models/errors.model';
-import { ListErrorsComponent } from '@/app/shared/component/list-errors/list-errors.component';
-import { Component, OnInit, DestroyRef, inject } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -10,24 +6,31 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
-interface SettingForm {
+import { User } from '../../core/auth/user.model';
+import { UserService } from '../../core/auth/services/user.service';
+import { ListErrorsComponent } from '../../shared/components/list-errors.component';
+import { Errors } from '../../core/models/errors.model';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+interface SettingsForm {
   image: FormControl<string>;
-  userName: FormControl<string>;
+  username: FormControl<string>;
   bio: FormControl<string>;
   email: FormControl<string>;
   password: FormControl<string>;
 }
+
 @Component({
-  selector: 'app-settings',
-  standalone: true,
-  imports: [ListErrorsComponent, ReactiveFormsModule],
+  selector: 'app-settings-page',
   templateUrl: './settings.component.html',
+  imports: [ListErrorsComponent, ReactiveFormsModule],
+  standalone: true,
 })
-export class SettingsComponent implements OnInit {
+export default class SettingsComponent implements OnInit {
   user!: User;
-  settingsForm = new FormGroup<SettingForm>({
+  settingsForm = new FormGroup<SettingsForm>({
     image: new FormControl('', { nonNullable: true }),
-    userName: new FormControl('', { nonNullable: true }),
+    username: new FormControl('', { nonNullable: true }),
     bio: new FormControl('', { nonNullable: true }),
     email: new FormControl('', { nonNullable: true }),
     password: new FormControl('', {
@@ -38,6 +41,7 @@ export class SettingsComponent implements OnInit {
   errors: Errors | null = null;
   isSubmitting = false;
   destroyRef = inject(DestroyRef);
+
   constructor(
     private readonly router: Router,
     private readonly userService: UserService
@@ -48,6 +52,7 @@ export class SettingsComponent implements OnInit {
       this.userService.getCurrentUser() as Partial<User>
     );
   }
+
   logout(): void {
     this.userService.logout();
   }
@@ -55,14 +60,16 @@ export class SettingsComponent implements OnInit {
   submitForm() {
     this.isSubmitting = true;
 
-    this.userService.update(this.settingsForm.value).subscribe({
-      next: ({ user }) =>
-        void this.router.navigate(['/profile/', user.userName]),
-
-      error: err => {
-        this.errors = err;
-        this.isSubmitting = false;
-      },
-    });
+    this.userService
+      .update(this.settingsForm.value)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ user }) =>
+          void this.router.navigate(['/profile/', user.username]),
+        error: err => {
+          this.errors = err;
+          this.isSubmitting = false;
+        },
+      });
   }
 }

@@ -1,40 +1,43 @@
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { UserService } from './services/user.service';
-import { Errors } from '../models/errors.model';
 import {
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
   Validators,
+  FormGroup,
+  FormControl,
+  ReactiveFormsModule,
 } from '@angular/forms';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIf } from '@angular/common';
-import { ListErrorsComponent } from '../../shared/component/list-errors/list-errors.component';
+import { ListErrorsComponent } from '../../shared/components/list-errors.component';
+import { Errors } from '../models/errors.model';
+import { UserService } from './services/user.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 interface AuthForm {
   email: FormControl<string>;
   password: FormControl<string>;
-  userName?: FormControl<string>;
+  username?: FormControl<string>;
 }
+
 @Component({
-  selector: 'app-auth',
+  selector: 'app-auth-page',
   templateUrl: './auth.component.html',
-  standalone: true,
   imports: [RouterLink, NgIf, ListErrorsComponent, ReactiveFormsModule],
+  standalone: true,
 })
-export class AuthComponent implements OnInit {
+export default class AuthComponent implements OnInit {
   authType = '';
   title = '';
   errors: Errors = { errors: {} };
   isSubmitting = false;
   authForm: FormGroup<AuthForm>;
   destroyRef = inject(DestroyRef);
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly userService: UserService
   ) {
-    this.authForm = new FormGroup({
+    this.authForm = new FormGroup<AuthForm>({
       email: new FormControl('', {
         validators: [Validators.required],
         nonNullable: true,
@@ -48,10 +51,10 @@ export class AuthComponent implements OnInit {
 
   ngOnInit(): void {
     this.authType = this.route.snapshot.url.at(-1)!.path;
-    this.title = this.authType === 'login' ? 'Sign In' : 'Sign Up';
+    this.title = this.authType === 'login' ? 'Sign in' : 'Sign up';
     if (this.authType === 'register') {
       this.authForm.addControl(
-        'userName',
+        'username',
         new FormControl('', {
           validators: [Validators.required],
           nonNullable: true,
@@ -71,11 +74,12 @@ export class AuthComponent implements OnInit {
           )
         : this.userService.register(
             this.authForm.value as {
-              userName: string;
               email: string;
               password: string;
+              username: string;
             }
           );
+
     observable.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => void this.router.navigate(['/']),
       error: err => {

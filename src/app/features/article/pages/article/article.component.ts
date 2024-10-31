@@ -1,28 +1,29 @@
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { ArticleMetaComponent } from '@/app/features/article/components/article-meta.component';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AsyncPipe, NgClass, NgForOf, NgIf } from '@angular/common';
-import { FollowButtonComponent } from '@/app/features/profile/components/follow-button.component';
-import { FavoriteButtonComponent } from '@/app/features/article/components/favorite-button.component';
-import { MarkdownPipe } from '@/app/shared/pipes/markdown.pipe';
-import { ListErrorsComponent } from '@/app/shared/component/list-errors/list-errors.component';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ArticleCommentComponent } from '@/app/features/article/components/article-comment.component';
-import { IfAuthenticatedDirective } from '@/app/core/auth/if-authenticated.directive';
-import { ArticlesService } from '@/app/features/article/services/articles.service';
-import { UserService } from '@/app/core/auth/services/user.service';
-import { CommentService } from '@/app/features/article/services/comment.service';
-import { Article } from '@/app/features/article/models/article.model';
-import { User } from '@/app/core/auth/user.model';
-import { Errors } from '@/app/core/models/errors.model';
-import { catchError, combineLatest, throwError } from 'rxjs';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { User } from '../../../../core/auth/user.model';
+import { Article } from '../../models/article.model';
+import { ArticlesService } from '../../services/articles.service';
+import { CommentsService } from '../../services/comments.service';
+import { UserService } from '../../../../core/auth/services/user.service';
+import { ArticleMetaComponent } from '../../components/article-meta.component';
+import { AsyncPipe, NgClass, NgForOf, NgIf } from '@angular/common';
+import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
+import { ListErrorsComponent } from '../../../../shared/components/list-errors.component';
+import { ArticleCommentComponent } from '../../components/article-comment.component';
+import { catchError } from 'rxjs/operators';
+import { combineLatest, throwError } from 'rxjs';
+import { Comment } from '../../models/comment.model';
+import { IfAuthenticatedDirective } from '../../../../core/auth/if-authenticated.directive';
+import { Errors } from '../../../../core/models/errors.model';
+import { Profile } from '../../../profile/models/profile.model';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Profile } from '@/app/features/profile/models/profile.model';
-import { Comment } from '@/app/features/article/models/comment.model';
+import { FavoriteButtonComponent } from '../../components/favorite-button.component';
+import { FollowButtonComponent } from '../../../profile/components/follow-button.component';
 
 @Component({
-  selector: 'app-article',
-  standalone: true,
+  selector: 'app-article-page',
+  templateUrl: './article.component.html',
   imports: [
     ArticleMetaComponent,
     RouterLink,
@@ -39,15 +40,15 @@ import { Comment } from '@/app/features/article/models/comment.model';
     IfAuthenticatedDirective,
     NgIf,
   ],
-  templateUrl: './article.component.html',
+  standalone: true,
 })
-export class ArticleComponent implements OnInit {
+export default class ArticleComponent implements OnInit {
   article!: Article;
   currentUser!: User | null;
   comments: Comment[] = [];
   canModify: boolean = false;
 
-  commentControl = new FormControl('', { nonNullable: true });
+  commentControl = new FormControl<string>('', { nonNullable: true });
   commentFormErrors: Errors | null = null;
 
   isSubmitting = false;
@@ -57,7 +58,7 @@ export class ArticleComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly articleService: ArticlesService,
-    private readonly commentService: CommentService,
+    private readonly commentsService: CommentsService,
     private readonly router: Router,
     private readonly userService: UserService
   ) {}
@@ -66,7 +67,7 @@ export class ArticleComponent implements OnInit {
     const slug = this.route.snapshot.params['slug'];
     combineLatest([
       this.articleService.get(slug),
-      this.commentService.getAll(slug),
+      this.commentsService.getAll(slug),
       this.userService.currentUser,
     ])
       .pipe(
@@ -80,12 +81,13 @@ export class ArticleComponent implements OnInit {
         this.article = article;
         this.comments = comments;
         this.currentUser = currentUser;
-        this.canModify = currentUser?.userName === article.author.userName;
+        this.canModify = currentUser?.username === article.author.username;
       });
   }
 
   onToggleFavorite(favorited: boolean): void {
     this.article.favorited = favorited;
+
     if (favorited) {
       this.article.favoritesCount++;
     } else {
@@ -99,6 +101,7 @@ export class ArticleComponent implements OnInit {
 
   deleteArticle(): void {
     this.isDeleting = true;
+
     this.articleService
       .delete(this.article.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -111,7 +114,7 @@ export class ArticleComponent implements OnInit {
     this.isSubmitting = true;
     this.commentFormErrors = null;
 
-    this.commentService
+    this.commentsService
       .add(this.article.slug, this.commentControl.value)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -128,7 +131,7 @@ export class ArticleComponent implements OnInit {
   }
 
   deleteComment(comment: Comment): void {
-    this.commentService
+    this.commentsService
       .delete(comment.id, this.article.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {

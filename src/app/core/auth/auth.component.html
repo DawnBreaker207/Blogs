@@ -7,6 +7,7 @@
           @if (authType === 'register') {
             <a [routerLink]="['/login']">Have an account?</a>
           }
+
           @if (authType === 'login') {
             <a [routerLink]="['/register']">Need an account?</a>
           }

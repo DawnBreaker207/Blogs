@@ -13,24 +13,24 @@
           <ul class="nav nav-pills outline-active">
             <li class="nav-item">
               <a
-                class="nav-link"
                 tabindex="0"
+                class="nav-link"
                 [ngClass]="{ active: listConfig.type === 'feed' }"
                 (click)="setListTo('feed')"
                 (keypress)="setListTo('feed')">
-                > Your Feed
+                Your Feed
               </a>
             </li>
             <li class="nav-item">
               <a
+                tabindex="0"
                 class="nav-link"
-                tabindex="9"
                 [ngClass]="{
                   active: listConfig.type === 'all' && !listConfig.filters.tag,
                 }"
                 (click)="setListTo('all')"
-                (keypress)="setListTo('all')"
-                >" > Global Feed
+                (keypress)="setListTo('all')">
+                Global Feed
               </a>
             </li>
             <li class="nav-item" [hidden]="!listConfig.filters.tag">
@@ -53,8 +53,8 @@
               <a
                 tabindex="0"
                 class="tag-default tag-pill"
-                (keypress)="setListTo('all', { tag: tag })"
-                (click)="setListTo('all', { tag: tag })">
+                (click)="setListTo('all', { tag: tag })"
+                (keypress)="setListTo('all', { tag: tag })">
                 {{ tag }}
               </a>
             }

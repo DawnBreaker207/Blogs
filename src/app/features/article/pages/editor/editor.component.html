@@ -42,8 +42,8 @@
                 @for (tag of tagList; track tag) {
                   <span class="tag-default tag-pill">
                     <i
-                      class="ion-close-round"
                       tabindex="0"
+                      class="ion-close-round"
                       (click)="removeTag(tag)"
                       (keypress)="removeTag(tag)"></i>
                     {{ tag }}

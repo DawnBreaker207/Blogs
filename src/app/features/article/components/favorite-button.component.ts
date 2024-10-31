@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import {
   Component,
   DestroyRef,
@@ -8,16 +7,15 @@ import {
   Output,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { EMPTY, switchMap } from 'rxjs';
+import { NgClass } from '@angular/common';
+import { ArticlesService } from '../services/articles.service';
 import { UserService } from '../../../core/auth/services/user.service';
 import { Article } from '../models/article.model';
-import { ArticlesService } from '../services/articles.service';
-import { EMPTY, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-favorite-button',
-  standalone: true,
-  imports: [NgClass],
   template: `
     <button
       class="btn btn-sm"
@@ -30,6 +28,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
       <i class="ion-heart"></i> <ng-content></ng-content>
     </button>
   `,
+  imports: [NgClass],
+  standalone: true,
 })
 export class FavoriteButtonComponent {
   destroyRef = inject(DestroyRef);
@@ -44,7 +44,7 @@ export class FavoriteButtonComponent {
     private readonly userService: UserService
   ) {}
 
-  toggleFavorite() {
+  toggleFavorite(): void {
     this.isSubmitting = true;
 
     this.userService.isAuthenticated

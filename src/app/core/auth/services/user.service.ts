@@ -1,19 +1,13 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { JwtService } from './jwt.service';
-import { Router } from '@angular/router';
-import { User } from '../user.model';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  map,
-  Observable,
-  tap,
-} from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 
-@Injectable({
-  providedIn: 'root',
-})
+import { JwtService } from './jwt.service';
+import { map, distinctUntilChanged, tap, shareReplay } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { User } from '../user.model';
+import { Router } from '@angular/router';
+
+@Injectable({ providedIn: 'root' })
 export class UserService {
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser = this.currentUserSubject
@@ -38,7 +32,7 @@ export class UserService {
   }
 
   register(credentials: {
-    userName: string;
+    username: string;
     email: string;
     password: string;
   }): Observable<{ user: User }> {
@@ -57,14 +51,17 @@ export class UserService {
       tap({
         next: ({ user }) => this.setAuth(user),
         error: () => this.purgeAuth(),
-      })
+      }),
+      shareReplay(1)
     );
   }
 
   update(user: Partial<User>): Observable<{ user: User }> {
-    return this.http
-      .put<{ user: User }>('/user', { user })
-      .pipe(tap(({ user }) => this.currentUserSubject.next(user)));
+    return this.http.put<{ user: User }>('/user', { user }).pipe(
+      tap(({ user }) => {
+        this.currentUserSubject.next(user);
+      })
+    );
   }
 
   setAuth(user: User): void {

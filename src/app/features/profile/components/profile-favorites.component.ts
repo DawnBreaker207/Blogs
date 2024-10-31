@@ -1,20 +1,20 @@
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ArticleListComponent } from '../../article/components/article-list.component';
+import { ProfileService } from '../services/profile.service';
 import { Profile } from '../models/profile.model';
 import { ArticleListConfig } from '../../article/models/article-list-config.model';
-import { ActivatedRoute } from '@angular/router';
-import { ProfileService } from '../services/profile.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-profile-favorites',
-  standalone: true,
+  template: `<app-article-list [limit]="10" [config]="favoritesConfig" />`,
   imports: [ArticleListComponent],
-  template: `<app-article-list [limit]="10" [config]="favoriteConfig" />`,
+  standalone: true,
 })
-export class ProfileFavoritesComponent implements OnInit {
+export default class ProfileFavoritesComponent implements OnInit {
   profile!: Profile;
-  favoriteConfig!: ArticleListConfig;
+  favoritesConfig!: ArticleListConfig;
   destroyRef = inject(DestroyRef);
 
   constructor(
@@ -24,15 +24,15 @@ export class ProfileFavoritesComponent implements OnInit {
 
   ngOnInit() {
     this.profileService
-      .get(this.route.parent?.snapshot.params['userName'])
+      .get(this.route.parent?.snapshot.params['username'])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (profile: Profile) => {
           this.profile = profile;
-          this.favoriteConfig = {
+          this.favoritesConfig = {
             type: 'all',
             filters: {
-              favorited: this.profile.userName,
+              favorited: this.profile.username,
             },
           };
         },

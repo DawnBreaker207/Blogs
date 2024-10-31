@@ -1,4 +1,3 @@
-import { NgClass } from '@angular/common';
 import {
   Component,
   DestroyRef,
@@ -7,29 +6,33 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Profile } from '../models/profile.model';
-import { ProfileService } from '../services/profile.service';
 import { Router } from '@angular/router';
+import { switchMap } from 'rxjs/operators';
+import { EMPTY } from 'rxjs';
+import { ProfileService } from '../services/profile.service';
 import { UserService } from '../../../core/auth/services/user.service';
-import { EMPTY, switchMap } from 'rxjs';
+import { Profile } from '../models/profile.model';
+import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-follow-button',
-  standalone: true,
+  template: `
+    <button
+      class="btn btn-sm action-btn"
+      [ngClass]="{
+        disabled: isSubmitting,
+        'btn-outline-secondary': !profile.following,
+        'btn-secondary': profile.following,
+      }"
+      (click)="toggleFollowing()">
+      <i class="ion-plus-round"></i>
+      &nbsp;
+      {{ profile.following ? 'Unfollow' : 'Follow' }} {{ profile.username }}
+    </button>
+  `,
   imports: [NgClass],
-  template: `<button
-    class="btn btn-sm action-btn"
-    [ngClass]="{
-      disabled: isSubmitting,
-      'btn-outlint-secondary': !profile.following,
-      'btn-sencondary': profile.following,
-    }"
-    (click)="(toggleFollowing)">
-    <i class="ion-plus-round"></i>
-    &nbsp;
-    {{ profile.following ? 'Unfollow' : 'Follow' }} {{ profile.userName }}
-  </button>`,
+  standalone: true,
 })
 export class FollowButtonComponent {
   @Input() profile!: Profile;
@@ -45,6 +48,7 @@ export class FollowButtonComponent {
 
   toggleFollowing(): void {
     this.isSubmitting = true;
+
     this.userService.isAuthenticated
       .pipe(
         switchMap((isAuthenticated: boolean) => {
@@ -54,9 +58,9 @@ export class FollowButtonComponent {
           }
 
           if (!this.profile.following) {
-            return this.profileService.follow(this.profile.userName);
+            return this.profileService.follow(this.profile.username);
           } else {
-            return this.profileService.unFollow(this.profile.userName);
+            return this.profileService.unfollow(this.profile.username);
           }
         }),
         takeUntilDestroyed(this.destroyRef)

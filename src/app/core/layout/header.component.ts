@@ -1,13 +1,12 @@
-import { AsyncPipe, NgIf } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
-import { IfAuthenticatedDirective } from '../auth/if-authenticated.directive';
 import { UserService } from '../auth/services/user.service';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { IfAuthenticatedDirective } from '../auth/if-authenticated.directive';
 
 @Component({
-  selector: 'app-header',
+  selector: 'app-layout-header',
   templateUrl: './header.component.html',
-  standalone: true,
   imports: [
     RouterLinkActive,
     RouterLink,
@@ -15,6 +14,7 @@ import { UserService } from '../auth/services/user.service';
     NgIf,
     IfAuthenticatedDirective,
   ],
+  standalone: true,
 })
 export class HeaderComponent {
   currentUser$ = inject(UserService).currentUser;

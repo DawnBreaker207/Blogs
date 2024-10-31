@@ -1,15 +1,13 @@
-import { UserService } from '@/app/core/auth/services/user.service';
-import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { UserService } from '../../../core/auth/services/user.service';
 import { User } from '../../../core/auth/user.model';
+import { RouterLink } from '@angular/router';
+import { map } from 'rxjs/operators';
 import { Comment } from '../models/comment.model';
+import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-article-comment',
-  standalone: true,
-  imports: [RouterLink, DatePipe, NgIf, AsyncPipe],
   template: `
     @if (comment) {
       <div class="card">
@@ -21,7 +19,7 @@ import { Comment } from '../models/comment.model';
         <div class="card-footer">
           <a
             class="comment-author"
-            [routerLink]="['/profile', comment.author.userName]">
+            [routerLink]="['/profile', comment.author.username]">
             <img
               [src]="comment.author.image"
               class="comment-author-img"
@@ -30,8 +28,8 @@ import { Comment } from '../models/comment.model';
           &nbsp;
           <a
             class="comment-author"
-            [routerLink]="['/profile', comment.author.userName]">
-            {{ comment.author.userName }}
+            [routerLink]="['/profile', comment.author.username]">
+            {{ comment.author.username }}
           </a>
           <span class="date-posted">
             {{ comment.createdAt | date: 'longDate' }}
@@ -39,17 +37,18 @@ import { Comment } from '../models/comment.model';
           @if (canModify$ | async) {
             <span class="mod-options">
               <i
-                class="ion-trash-a"
                 tabindex="0"
+                class="ion-trash-a"
                 (click)="delete.emit(true)"
-                (keydown.enter)="delete.emit(true)"
-                (keydown.space)="delete.emit(true)"></i>
+                (keydown)="delete.emit(true)"></i>
             </span>
           }
         </div>
       </div>
     }
   `,
+  imports: [RouterLink, DatePipe, NgIf, AsyncPipe],
+  standalone: true,
 })
 export class ArticleCommentComponent {
   @Input() comment!: Comment;
@@ -58,7 +57,7 @@ export class ArticleCommentComponent {
   canModify$ = inject(UserService).currentUser.pipe(
     map(
       (userData: User | null) =>
-        userData?.userName === this.comment.author.userName
+        userData?.username === this.comment.author.username
     )
   );
 }
