@@ -14,6 +14,6 @@ import lombok.Setter;
 public class ArticleWrapper {
 
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
-    private List<ArticleReponse> articles;
+    private List<ArticleResponse> articles;
     private int articlesCount;
 }
