@@ -12,7 +12,6 @@ import com.project.blog.api.model.user.UserAuthenticate;
 import com.project.blog.api.model.user.UserResponse;
 import com.project.blog.api.model.user.UserToken;
 import com.project.blog.domain.model.User;
-import com.project.blog.domain.service.ProfileService;
 import com.project.blog.domain.service.UserService;
 
 import lombok.RequiredArgsConstructor;
