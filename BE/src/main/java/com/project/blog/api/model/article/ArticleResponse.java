@@ -14,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonTypeName("article")
-public class ArticleReponse extends BaseResponse {
+public class ArticleResponse extends BaseResponse {
 
     private String slug;
     private String title;
