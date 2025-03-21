@@ -1,0 +1,49 @@
+version: "3.9"
+
+networks:
+  network:
+    driver: bridge
+
+services:
+  client:
+    build: 
+     context: ./FE	
+	 dockerfile: Dockerfile
+   container_name: FE
+   ports:
+     - "80:80"
+   depends_on:
+     - api
+   networks:
+     - networks
+	
+  api:
+    build: 
+	  context: ./BE	
+      dockerfile: Dockerfile
+    container_name: api
+    	
+    command: ["/wait-for-it.sh", "mysql:3306", "-t", "30", "--", "java", "-jar", "api.jar"]
+      environment:
+      SPRING_PROFILE: "dev"
+      DB_HOST: MySqlDB
+      TOKEN_SECRET: "thisIsNotAStrongSecretAlsoHardCodingASecretInADockerComposeFileIsNotRecommended"
+    ports:
+      - "8080:8080"
+    networks:
+      - network
+    depends_on:
+      - mysql
+	  
+   mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+    ports:
+      - "3308:3306"
+    networks:
+      - network
+
+ 
+	  
+	  
